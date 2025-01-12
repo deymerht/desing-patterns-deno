@@ -42,45 +42,53 @@ class QueryBuilder {
   private table: string;
   private fields: string[] = [];
   private conditions: string[] = [];
-  private orderFields: string[] = [];
-  private limitCount?: number;
+  private orderByClause: string = '';
+  private limitCount: number | null = null;
 
   constructor(table: string) {
     this.table = table;
   }
 
-  select(...fields: string[]): QueryBuilder {
-    throw new Error('Method not implemented.');
+  select(...fields: string[]): this {
+    this.fields = fields;
+    return this;
   }
 
-  where(condition: string): QueryBuilder {
-    throw new Error('Method not implemented.');
+  where(condition: string): this {
+    this.conditions.push(condition);
+    return this;
   }
 
-  orderBy(field: string, direction: 'ASC' | 'DESC' = 'ASC'): QueryBuilder {
-    throw new Error('Method not implemented.');
+  orderBy(field: string, order: 'ASC' | 'DESC' = 'ASC'): this {
+    this.orderByClause = `${field} ${order}`;
+    return this;
   }
 
-  limit(count: number): QueryBuilder {
-    throw new Error('Method not implemented.');
+  limit(count: number): this {
+    this.limitCount = count;
+    return this;
   }
 
   execute(): string {
-    // Select id, name, email from users where age > 18 and country = 'Cri' order by name ASC limit 10;
-    throw new Error('Method not implemented.');
+    const fields = this.fields.join(', ');
+    const whereClause = this.conditions.length ? `WHERE ${this.conditions.join(' AND ')}` : '';
+    const orderByClause = this.orderByClause ? `ORDER BY ${this.orderByClause}` : '';
+    const limitClause = this.limitCount ? `LIMIT ${this.limitCount}` : '';
+    return `SELECT ${fields} FROM ${this.table} ${whereClause} ${orderByClause} ${limitClause}`;
   }
 }
 
 function main() {
   const usersQuery = new QueryBuilder('users')
-    .select('id', 'name', 'email')
-    .where('age > 18')
-    .where("country = 'Cri'") // Esto debe de hacer una condición AND
-    .orderBy('name', 'ASC')
+    .select('age')
+    .where('age > 30')
+    .where('age < 50')
+    .where("country = 'COLOMBIA'") // Esto debe de hacer una condición AND
+    .orderBy('age')
     .limit(10)
     .execute();
 
-  console.log('%cConsulta:\n', COLORS.red);
+  console.log('%cConsulta:\n', 'color: violet;');
   console.log(usersQuery);
 }
 
